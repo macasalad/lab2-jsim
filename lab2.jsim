@@ -54,6 +54,24 @@
     Xnand4 out_1 out_2 out_3 fx_nand_out nand3
 .ends
 
+*****************************************************************************
+* The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
+* The plot window shows that this design has longer propagation delays.
+* Since the critical path passes through two different types of gates, this stacking
+* increases the propagation delay. 
+*
+* Meanwhile, the final circuit (fx_nand) only uses one type of gate: NAND gates.
+* NAND is a universal gate and is more efficient in CMOS implementations. 
+* Compared to mixing AND and OR gates, using only NAND gates is more uniform and
+* seems to allow for faster switching. 
+* Hence, the propagation delays are shorter than that of fx_orig.
+* 
+* The plot window confirms shorter propagation delays for fx_nand compared to fx_orig,
+* proving that fx_nand achieves the same Boolean function at a better speed. 
+* Therefore, we submit fx_nand as the final circuit because it is more efficient and
+* optimized for NAND-based logic. 
+*******************************************************************************
+
 *******************************************************************************
 * The full adder circuit equation that adds three bits can be derived from its truth table.
 * First, full adder logic shows that sum only becomes 1 when an odd number of inputs is 1.
@@ -77,22 +95,6 @@
 *        Xand2: computes (A XOR B) AND C_in
 *        Xor1: computes (AB) + C_in(A XOR B)
 *****************************************************************************
-* The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
-* The plot window shows that this design has longer propagation delays.
-* Since the critical path passes through two different types of gates, this stacking
-* increases the propagation delay. 
-*
-* Meanwhile, the final circuit (fx_nand) only uses one type of gate: NAND gates.
-* NAND is a universal gate and is more efficient in CMOS implementations. 
-* Compared to mixing AND and OR gates, using only NAND gates is more uniform and
-* seems to allow for faster switching. 
-* Hence, the propagation delays are shorter than that of fx_orig.
-* 
-* The plot window confirms shorter propagation delays for fx_nand compared to fx_orig,
-* proving that fx_nand achieves the same Boolean function at a better speed. 
-* Therefore, we submit fx_nand as the final circuit because it is more efficient and
-* optimized for NAND-based logic. 
-*******************************************************************************
 
 .subckt fa_orig a b c_in sum_orig c_out_orig
     Xxor1 a b sum_1 xor2
@@ -101,8 +103,6 @@
     Xand2 c_in sum_1 c_out2 and2
     Xor1 c_out1 c_out2 c_out_orig or2
 .ends
-
-
 
 .subckt fa_xor_nand a b c_in sum_xor_nand c_out_xor_nand
     Xxor1 a b sum_1 xor2
