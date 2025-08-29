@@ -9,6 +9,18 @@
 .include "stdcell.jsim"
 *******************************************************************************
 
+*******************************************************************************
+* Subcircuit: fx_orig
+* Equation implemented: OUT = ABC + DE + FG
+* Notes:
+*   - Inputs:  a, b, c, d, e, f, g
+*   - Output:  fx_orig_out
+*   - Logic:
+*       Xand1: computes ABC
+*       Xand2: computes DE
+*       Xand3: computes FG
+*       Xor1: combines all three products into the final output
+*******************************************************************************
 .subckt fx_orig a b c d e f g fx_orig_out
     Xand1 a b c out_1 and3
     Xand2 d e out_2 and2
@@ -17,17 +29,24 @@
 .ends
 
 *******************************************************************************
-* In converting the AND/OR to NAND gate:
-* NAND(A,B) = (AB)’			Note that NAND is the complement of an AND gate
-* AB = ((AB)’)’ 			Apply double negation
-* 1st NAND gives (AB)’
-* 2nd NAND inverts back to AB
-* A + B = (A’B’)’ 			Apply De Morgan’s Law to implement OR using NANDs
-* A’ = NAND(A,A)
-* B’ = NAND(B,B)
-* NAND(A’, B’) = (A’B’) = A + B
+* Subcircuit: fx_nand
+* Equation implemented: OUT = ![!(ABC)!(DE)!(FG)]
+* This equation was derived from the original equation:
+* OUT = ABC + DE + FG        // Original Equation
+* OUT = ![!(ABC + DE + FG)]  // Applying Double Negation
+* OUT = ![!(ABC)!(DE)!(FG)]  // Applying De Morgan's Law
+* Notes:
+*   - Inputs:  a, b, c, d, e, f, g
+*   - Output:  fx_nand_out
+*   - Logic:
+*       Xnand1: computes !(ABC)
+*       Xnand2: computes !(DE)
+*       Xnand3: computes !(FG)
+*       Xnand4: computes ![!(ABC)!(DE)!(FG)]
+*   - Implemented entirely with NAND gates
+*   - NAND gates are preferred in practice because they are more 
+*     efficient and cost-friendly to fabricate.
 *******************************************************************************
-
 .subckt fx_nand a b c d e f g fx_nand_out
     Xnand1 a b c out_1 nand3
     Xnand2 d e out_2 nand2
@@ -58,6 +77,22 @@
 *        Xand2: computes (A XOR B) AND C_in
 *        Xor1: computes (AB) + C_in(A XOR B)
 *****************************************************************************
+* The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
+* The plot window shows that this design has longer propagation delays.
+* Since the critical path passes through two different types of gates, this stacking
+* increases the propagation delay. 
+*
+* Meanwhile, the final circuit (fx_nand) only uses one type of gate: NAND gates.
+* NAND is a universal gate and is more efficient in CMOS implementations. 
+* Compared to mixing AND and OR gates, using only NAND gates is more uniform and
+* seems to allow for faster switching. 
+* Hence, the propagation delays are shorter than that of fx_orig.
+* 
+* The plot window confirms shorter propagation delays for fx_nand compared to fx_orig,
+* proving that fx_nand achieves the same Boolean function at a better speed. 
+* Therefore, we submit fx_nand as the final circuit because it is more efficient and
+* optimized for NAND-based logic. 
+*******************************************************************************
 
 .subckt fa_orig a b c_in sum_orig c_out_orig
     Xxor1 a b sum_1 xor2
@@ -91,13 +126,18 @@
     Xnand9 nand_1 nand_5 c_out_nand nand2
 .ends
 
+*******************************************************************************
+* Circuit Instantiations
+*******************************************************************************
 Xfx_orig clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_orig_out fx_orig
 Xfx_nand clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_nand_out fx_nand
-
 Xfa_orig clk5 clk6 clk7 sum_orig c_out_orig fa_orig
 Xfa_xor_nand clk5 clk6 clk7 sum_xor_nand c_out_xor_nand fa_xor_nand
 Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 
+*******************************************************************************
+* Transient Analysis, Input Clock Signals, and Output Signals
+*******************************************************************************
 .tran 640ns
 .plot clk1
 .plot clk2
@@ -114,4 +154,3 @@ Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 .plot c_out_orig
 .plot c_out_xor_nand
 .plot c_out_nand
-
