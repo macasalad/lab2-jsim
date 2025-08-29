@@ -57,3 +57,21 @@ Xfa clk5 clk6 clk7 sum c_out fa
 .plot sum
 .plot c_out_orig
 .plot c_out
+
+*******************************************************************************
+* The original circuit (fx_orig) uses three AND gates that feeds into one OR gate.
+* The plot window shows that this design has longer propagation delay.
+* Since the critical path passes through two different types of gates, this stacking
+* increases the propagation delay. 
+*
+* The final circuit (fx) only uses one type of gate: NAND gates.
+* NAND is a universal gate and is more efficient in CMOS implementations. 
+* Compared to mixing AND and OR gates, using only NAND gates is more uniform and
+* seems to allow for faster switching. 
+* Hence, the propagation delays are shorter than that of fx_orig.
+* 
+* The plot window confirms shorter propagation delays for fx compared to fx_orig,
+* proving that fx achieves the same Boolean function at a better speed. 
+* Therefore, we submit fx as the final circuit because it is more efficient and
+* optimized for NAND-based logic. 
+*******************************************************************************
