@@ -35,13 +35,39 @@
     Xnand4 out_1 out_2 out_3 fx_nand_out nand3
 .ends
 
+*******************************************************************************
+* The full adder circuit equation that adds three bits can be derived from its truth table.
+* First, full adder logic shows that sum only becomes 1 when an odd number of inputs is 1.
+* Therefore, the equation A XOR B XOR C_in can be derived for getting the sum.
+* Next, the equation for C_out can be expressed in Sum-of-Products form:
+* C_out = !ABC_in + A!BC_in + AB!C_in + ABC_in
+* We can now simplify it as such:
+* C_out = !ABC_in + A!BC_in + AB(!C_in + C_in)
+* C_out = !ABC_in + A!BC_in + AB(1)
+* C_out = C_in(!AB + A!B) + AB
+* C_out = C_in(A XOR B) + AB
+* This is now the basis for implementing the following subcircuit: 
+* Subcircuit: fa_orig
+* Notes:
+*    - Inputs:  a, b, c_in
+*    - Output:  sum_orig, c_out_orig
+*    - Logic:
+*        Xxor1: computes A XOR B
+*        Xxor2: computes (A XOR B) XOR C_in
+*        Xand1: computes A AND B
+*        Xand2: computes (A XOR B) AND C_in
+*        Xor1: computes (AB) + C_in(A XOR B)
+*****************************************************************************
+
 .subckt fa_orig a b c_in sum_orig c_out_orig
     Xxor1 a b sum_1 xor2
     Xxor2 sum_1 c_in sum_orig xor2
     Xand1 a b c_out1 and2
     Xand2 c_in sum_1 c_out2 and2
-    Xor3 c_out1 c_out2 c_out_orig or2
+    Xor1 c_out1 c_out2 c_out_orig or2
 .ends
+
+
 
 .subckt fa_xor_nand a b c_in sum_xor_nand c_out_xor_nand
     Xxor1 a b sum_1 xor2
@@ -89,20 +115,3 @@ Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 .plot c_out_xor_nand
 .plot c_out_nand
 
-*******************************************************************************
-* The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
-* The plot window shows that this design has longer propagation delays.
-* Since the critical path passes through two different types of gates, this stacking
-* increases the propagation delay. 
-*
-* The final circuit (fx) only uses one type of gate: NAND gates.
-* NAND is a universal gate and is more efficient in CMOS implementations. 
-* Compared to mixing AND and OR gates, using only NAND gates is more uniform and
-* seems to allow for faster switching. 
-* Hence, the propagation delays are shorter than that of fx_orig.
-* 
-* The plot window confirms shorter propagation delays for fx compared to fx_orig,
-* proving that fx achieves the same Boolean function at a better speed. 
-* Therefore, we submit fx as the final circuit because it is more efficient and
-* optimized for NAND-based logic. 
-*******************************************************************************
