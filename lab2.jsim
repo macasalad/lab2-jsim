@@ -91,9 +91,9 @@
 *    - Logic:
 *        Xxor1: computes A XOR B
 *        Xxor2: computes (A XOR B) XOR C_in
-*        Xand1: computes A AND B
-*        Xand2: computes (A XOR B) AND C_in
-*        Xor1: computes (AB) + C_in(A XOR B)
+*        Xand1: computes AB
+*        Xand2: computes (A XOR B)C_in
+*        Xor1: computes (AB) + [C_in(A XOR B)]
 *****************************************************************************
 
 .subckt fa_orig a b c_in sum_orig c_out_orig
@@ -103,6 +103,26 @@
     Xand2 c_in sum_1 c_out2 and2
     Xor1 c_out1 c_out2 c_out_orig or2
 .ends
+
+*****************************************************************************
+* Subcircuit: fa_xor_nand
+* Equation implemented:
+* SUM = A XOR B XOR C
+* C_out = ![!(AB)![(A XOR B)C_in]]
+* The sum equation remains the same, but the C_out equation was derived as follows:
+* C_out = AB + (A XOR B)C_in
+* C_out = !![AB + (A XOR B)C_in] // Applying Double Negation
+* C_out = ![!(AB)![(A XOR B)C_in]] // Applying De Morgan's Law
+* Notes:
+*    - Inputs:  a, b, c_in
+*    - Output:  sum_xor_nand, c_out_xor_nand
+*    - Logic:
+*        Xxor1: computes A XOR B
+*        Xxor2: computes (A XOR B) XOR C_in
+*        Xnand1: computes !(AB)
+*        Xnand2: computes ![C_in(A XOR B)]
+*        Xnand3: computes ![!(AB)![(A XOR B)C_in]]
+*****************************************************************************
 
 .subckt fa_xor_nand a b c_in sum_xor_nand c_out_xor_nand
     Xxor1 a b sum_1 xor2
