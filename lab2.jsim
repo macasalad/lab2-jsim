@@ -31,7 +31,7 @@
 .ends
 
 *******************************************************************************
-* Subcircuit: fx_nand
+* Subcircuit: fx
 * Equation implemented: OUT = ![!(ABC)!(DE)!(FG)]
 * This equation was derived from the original equation:
 * OUT = ABC + DE + FG        // Original Equation
@@ -49,11 +49,11 @@
 *   - NAND gates are preferred in practice because they are more 
 *     efficient and cost-friendly to fabricate.
 *******************************************************************************
-.subckt fx_nand a b c d e f g fx_nand_out
+.subckt fx a b c d e f g fx_out
     Xnand1 a b c out_1 nand3
     Xnand2 d e out_2 nand2
     Xnand3 f g out_3 nand2
-    Xnand4 out_1 out_2 out_3 fx_nand_out nand3
+    Xnand4 out_1 out_2 out_3 fx_out nand3
 .ends
 
 *****************************************************************************
@@ -62,15 +62,15 @@
 * Since the critical path passes through two different types of gates, this stacking
 * increases the propagation delay. 
 *
-* Meanwhile, the final circuit (fx_nand) only uses one type of gate: NAND gates.
+* Meanwhile, the final circuit (fx) only uses one type of gate: NAND gates.
 * NAND is a universal gate and is more efficient in CMOS implementations. 
 * Compared to mixing AND and OR gates, using only NAND gates is more uniform and
 * seems to allow for faster switching. 
 * Hence, the propagation delays are shorter than that of fx_orig.
 * 
-* The plot window confirms shorter propagation delays for fx_nand compared to fx_orig,
-* proving that fx_nand achieves the same Boolean function at a better speed. 
-* Therefore, we submit fx_nand as the final circuit because it is more efficient and
+* The plot window confirms shorter propagation delays for fx compared to fx_orig,
+* proving that fx achieves the same Boolean function at a better speed. 
+* Therefore, we submit fx as the final circuit because it is more efficient and
 * optimized for NAND-based logic. 
 *******************************************************************************
 
@@ -107,7 +107,7 @@
 .ends
 
 *****************************************************************************
-* Subcircuit: fa_xor_nand
+* Subcircuit: fa
 * Equation implemented:
 * SUM = A XOR B XOR C
 * C_out = ![!(AB)![(A XOR B)C_in]]
@@ -117,7 +117,7 @@
 * C_out = ![!(AB)![(A XOR B)C_in]] // Applying De Morgan's Law
 * Notes:
 *    - Inputs:  a, b, c_in
-*    - Output:  sum_xor_nand, c_out_xor_nand
+*    - Output:  sum, c_out
 *    - Logic:
 *        Xxor1: computes A XOR B
 *        Xxor2: computes (A XOR B) XOR C_in
@@ -126,12 +126,12 @@
 *        Xnand3: computes ![!(AB)![(A XOR B)C_in]]
 *****************************************************************************
 
-.subckt fa_xor_nand a b c_in sum_xor_nand c_out_xor_nand
+.subckt fa a b c_in sum c_out
     Xxor1 a b sum_1 xor2
-    Xxor2 sum_1 c_in sum_xor_nand xor2
+    Xxor2 sum_1 c_in sum xor2
     Xnand1 a b c_out1 nand2
     Xnand2 c_in sum_1 c_out2 nand2
-    Xnand3 c_out1 c_out2 c_out_xor_nand nand2
+    Xnand3 c_out1 c_out2 c_out nand2
 .ends
 
 *******************************************************************************
@@ -174,13 +174,29 @@
     Xnand9 nand_1 nand_5 c_out_nand nand2
 .ends
 
+***************************************************************************
+* The original circuit (fa_orig) uses two XOR gates, two AND gates, and one OR gate.
+* The second circuit (fa) uses two XOR gates and three NAND gates.
+* The third circuit (fa_nand) uses nine NAND gates.
+* The first circuit performs the least efficiently due to its use of AND gates and OR gates.
+* It can also be seen as it has the longest propagation delays in the plot among the three.
+* Then, the remaining two circuits are much more efficient due to their use of NAND gates.
+* Despite some variances, it can be observed that fa_nand has faster propagation delays than fa.
+* This makes sense because NAND gates are generally the most efficient gates in CMOS implementations.
+* However, it is important to note that fa_nand uses nine gates in total, while fa only uses five.
+* While propagation delays do play a factor in efficiency, they matter less than the number of gates used.
+* Although fa_nand achieves lower propagation delay, it also costs nearly twice as much gates.
+* Minimizing gate count leads to a more practical and efficient design overall.
+* Thus, we submit fa as our final circuit.
+*****************************************************************************
+
 *******************************************************************************
 * Circuit Instantiations
 *******************************************************************************
 Xfx_orig clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_orig_out fx_orig
-Xfx_nand clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_nand_out fx_nand
+Xfx clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_out fx
 Xfa_orig clk5 clk6 clk7 sum_orig c_out_orig fa_orig
-Xfa_xor_nand clk5 clk6 clk7 sum_xor_nand c_out_xor_nand fa_xor_nand
+Xfa clk5 clk6 clk7 sum c_out fa
 Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 
 *******************************************************************************
@@ -195,10 +211,10 @@ Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 .plot clk6
 .plot clk7
 .plot fx_orig_out
-.plot fx_nand_out
+.plot fx_out
 .plot sum_orig
-.plot sum_xor_nand
+.plot sum
 .plot sum_nand
 .plot c_out_orig
-.plot c_out_xor_nand
+.plot c_out
 .plot c_out_nand
