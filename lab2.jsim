@@ -20,6 +20,8 @@
 *       Xand2: computes DE
 *       Xand3: computes FG
 *       Xor1: combines all three products into the final output
+*   - This implementation directly follows the original given equation
+*     without any algebraic manipulation or gate transformation.
 *******************************************************************************
 .subckt fx_orig a b c d e f g fx_orig_out
     Xand1 a b c out_1 and3
@@ -112,6 +114,32 @@
     Xnand3 c_out1 c_out2 c_out_xor_nand nand2
 .ends
 
+*******************************************************************************
+* Subcircuit: fa_nand
+* Note that:
+*   SUM = A XOR B = ![!(A!(AB))!(B!(AB))] (https://www.tutorialspoint.com/digital-electronics/implementation-of-xor-gate-from-nand-gate.htm)
+*   We can let Y = ![!(A!(AB))!(B!(AB))]
+*   Thus, (A XOR B) XOR C_IN = Y XOR C_IN
+*   Moreover, C_OUT = AB + C_IN(A XOR B)
+*   C_OUT = AB + C_IN(Y)
+*
+* Notes:
+*   - Inputs:  a, b, c_in
+*   - Outputs: sum_nand, c_out_nand
+*   - Logic:
+*       Xnand1: computes !(AB)
+*       Xnand2: computes !(A!(AB))
+*       Xnand3: computes !(B!(AB))
+*       Xnand4: computes ![!(A!(AB))!(B!(AB))], which is our Y = A XOR B
+*       Xnand5: computes !(Y C_in)
+*       Xnand6: computes !(Y!(Y C_in))
+*       Xnand7: computes !(C_in!(Y C_in))
+*       Xnand8: computes ![!(Y!(Y C_in))!(C_in!(Y C_in))], which is Y XOR C_in,
+*               equal to SUM = A XOR B XOR C_in
+*       Xnand9: computes ![!(AB)!(Y C_in)], which is the carry_out,
+*               C_OUT = ![!(AB)!((A XOR B)(C_in))]
+*   - Overall, the circuit uses 9 NAND gates
+*******************************************************************************
 .subckt fa_nand a b c_in sum_nand c_out_nand
     Xnand1 a b nand_1 nand2
     Xnand2 a nand_1 nand_2 nand2
