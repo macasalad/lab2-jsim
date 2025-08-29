@@ -8,6 +8,7 @@
 .include "nominal.jsim"
 .include "stdcell.jsim"
 *******************************************************************************
+
 .subckt fx_orig a b c d e f g fx_orig_out
     Xand1 a b c out_1 and3
     Xand2 d e out_2 and2
@@ -15,11 +16,23 @@
     Xor1 out_1 out_2 out_3 fx_orig_out or3
 .ends
 
-.subckt fx a b c d e f g fx_out
+*******************************************************************************
+* In converting the AND/OR to NAND gate:
+* NAND(A,B) = (AB)’			Note that NAND is the complement of an AND gate
+* AB = ((AB)’)’ 			Apply double negation
+* 1st NAND gives (AB)’
+* 2nd NAND inverts back to AB
+* A + B = (A’B’)’ 			Apply De Morgan’s Law to implement OR using NANDs
+* A’ = NAND(A,A)
+* B’ = NAND(B,B)
+* NAND(A’, B’) = (A’B’) = A + B
+*******************************************************************************
+
+.subckt fx_nand a b c d e f g fx_nand_out
     Xnand1 a b c out_1 nand3
     Xnand2 d e out_2 nand2
     Xnand3 f g out_3 nand2
-    Xnand4 out_1 out_2 out_3 fx_out nand3
+    Xnand4 out_1 out_2 out_3 fx_nand_out nand3
 .ends
 
 .subckt fa_orig a b c_in sum_orig c_out_orig
@@ -30,18 +43,34 @@
     Xor3 c_out1 c_out2 c_out_orig or2
 .ends
 
-.subckt fa a b c_in sum c_out
+.subckt fa_xor_nand a b c_in sum_xor_nand c_out_xor_nand
     Xxor1 a b sum_1 xor2
-    Xxor2 sum_1 c_in sum xor2
+    Xxor2 sum_1 c_in sum_xor_nand xor2
     Xnand1 a b c_out1 nand2
     Xnand2 c_in sum_1 c_out2 nand2
-    Xnand3 c_out1 c_out2 c_out nand2
+    Xnand3 c_out1 c_out2 c_out_xor_nand nand2
+.ends
+
+.subckt fa_nand a b c_in sum_nand c_out_nand
+    Xnand1 a b nand_1 nand2
+    Xnand2 a nand_1 nand_2 nand2
+    Xnand3 b nand_1 nand_3 nand2
+    Xnand4 nand_2 nand_3 a_xor_b nand2
+
+    Xnand5 a_xor_b c_in nand_5 nand2
+    Xnand6 a_xor_b nand_5 nand_6 nand2
+    Xnand7 c_in nand_5 nand_7 nand2
+    Xnand8 nand_6 nand_7 sum_nand nand2
+
+    Xnand9 nand_1 nand_5 c_out_nand nand2
 .ends
 
 Xfx_orig clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_orig_out fx_orig
-Xfx clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_out fx
-Xfa_prog clk5 clk6 clk7 sum_orig c_out_orig fa_orig
-Xfa clk5 clk6 clk7 sum c_out fa
+Xfx_nand clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_nand_out fx_nand
+
+Xfa_orig clk5 clk6 clk7 sum_orig c_out_orig fa_orig
+Xfa_xor_nand clk5 clk6 clk7 sum_xor_nand c_out_xor_nand fa_xor_nand
+Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 
 .tran 640ns
 .plot clk1
@@ -54,13 +83,15 @@ Xfa clk5 clk6 clk7 sum c_out fa
 .plot fx_orig_out
 .plot fx_out
 .plot sum_orig
-.plot sum
+.plot sum_xor_nand
+.plot sum_nand
 .plot c_out_orig
-.plot c_out
+.plot c_out_xor_nand
+.plot c_out_nand
 
 *******************************************************************************
-* The original circuit (fx_orig) uses three AND gates that feeds into one OR gate.
-* The plot window shows that this design has longer propagation delay.
+* The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
+* The plot window shows that this design has longer propagation delays.
 * Since the critical path passes through two different types of gates, this stacking
 * increases the propagation delay. 
 *
