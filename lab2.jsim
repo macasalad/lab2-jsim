@@ -195,7 +195,7 @@ Xfa_nand clk5 clk6 clk7 sum_nand c_out_nand fa_nand
 .plot clk6
 .plot clk7
 .plot fx_orig_out
-.plot fx_out
+.plot fx_nand_out
 .plot sum_orig
 .plot sum_xor_nand
 .plot sum_nand
