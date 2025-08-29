@@ -58,17 +58,17 @@
 
 *****************************************************************************
 * The original circuit (fx_orig) uses three AND gates that feed into one OR gate.
-* The plot window shows that this design has longer propagation delays.
+* The plot window shows that this design has longer transition delays.
 * Since the critical path passes through two different types of gates, this stacking
-* increases the propagation delay. 
+* increases the transition delay. 
 *
 * Meanwhile, the final circuit (fx) only uses one type of gate: NAND gates.
 * NAND is a universal gate and is more efficient in CMOS implementations. 
 * Compared to mixing AND and OR gates, using only NAND gates is more uniform and
 * seems to allow for faster switching. 
-* Hence, the propagation delays are shorter than that of fx_orig.
+* Hence, the transition delays are shorter than that of fx_orig.
 * 
-* The plot window confirms shorter propagation delays for fx compared to fx_orig,
+* The plot window confirms shorter transition delays for fx compared to fx_orig,
 * proving that fx achieves the same Boolean function at a better speed. 
 * Therefore, we submit fx as the final circuit because it is more efficient and
 * optimized for NAND-based logic. 
@@ -179,13 +179,13 @@
 * The second circuit (fa) uses two XOR gates and three NAND gates.
 * The third circuit (fa_nand) uses nine NAND gates.
 * The first circuit performs the least efficiently due to its use of AND gates and OR gates.
-* It can also be seen as it has the longest propagation delays in the plot among the three.
+* It can also be seen as it has the longest transition delays in the plot among the three.
 * Then, the remaining two circuits are much more efficient due to their use of NAND gates.
-* Despite some variances, it can be observed that fa_nand has faster propagation delays than fa.
+* Despite some variances, it can be observed that fa_nand has faster transition delays than fa.
 * This makes sense because NAND gates are generally the most efficient gates in CMOS implementations.
 * However, it is important to note that fa_nand uses nine gates in total, while fa only uses five.
-* While propagation delays do play a factor in efficiency, they matter less than the number of gates used.
-* Although fa_nand achieves lower propagation delay, it also costs nearly twice as much gates.
+* While transition delays do play a factor in efficiency, they matter less than the number of gates used.
+* Although fa_nand achieves lower transition delay, it also costs nearly twice as much gates.
 * Minimizing gate count leads to a more practical and efficient design overall.
 * Thus, we submit fa as our final circuit.
 *****************************************************************************
