@@ -1,0 +1,110 @@
+*******************************************************************************
+* LAB #2
+* - Baniqued, Hannah Lei
+* - Gonzales, Robynne Alexa
+* - Paderna, Mikaela
+*******************************************************************************
+
+
+*******************************************************************************
+* The following .include lines are necessary for all your CSCI 50.02 JSim
+* exercises. These work like your Java import statement.
+*******************************************************************************
+
+.include "8clocks.jsim"
+.include "nominal.jsim"
+.include "stdcell.jsim"
+
+
+*******************************************************************************
+* What follows is a (one-line) statement that describes our first "Hello
+* World!" circuit. This statement is in the form:
+*
+*   Xid a z inverter
+*
+* Xid is just the name we give to this circuit block (in this case, Xinv).
+* a is an input node ("clk1" is a 10ns-period clock defined in 8clocks.jsim).
+* z is an output node (the name "out" is just something we made up).
+* inverter is the type of subcircuit that we want (defined in stdcell.jsim).
+*******************************************************************************
+.subckt fx_orig a b c d e f g fx_orig_out
+    Xand1 a b c out_1 and3
+    Xand2 d e out_2 and2
+    Xand3 f g out_3 and2
+    Xor1 out_1 out_2 out_3 fx_orig_out or3
+.ends
+
+.subckt fx a b c d e f g fx_out
+    Xnand1 a b c out_1 nand3
+    Xnand2 d e out_2 nand2
+    Xnand3 f g out_3 nand2
+    Xnand4 out_1 out_2 out_3 fx_out nand3
+.ends
+
+.subckt fa_orig a b c_in sum_orig c_out_orig
+    Xxor1 a b sum_1 xor2
+    Xxor2 sum_1 c_in sum_orig xor2
+    Xand1 a b c_out1 and2
+    Xand2 c_in sum_1 c_out2 and2
+    Xor3 c_out1 c_out2 c_out_orig or2
+.ends
+
+.subckt fa a b c_in sum c_out
+    Xxor1 a b sum_1 xor2
+    Xxor2 sum_1 c_in sum xor2
+    Xnand1 a b c_out1 nand2
+    Xnand2 c_in sum_1 c_out2 nand2
+    Xnand3 c_out1 c_out2 c_out nand2
+.ends
+
+Xfx_orig clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_orig_out fx_orig
+Xfx clk1 clk2 clk3 clk4 clk5 clk6 clk7 fx_out fx
+Xfa_prog clk5 clk6 clk7 sum_orig c_out_orig fa_orig
+Xfa clk5 clk6 clk7 sum c_out fa
+*******************************************************************************
+* The circuit above does NOT display anything in the simulator. We tell JSim
+* to display something via .tran and .plot commands. The .tran statement
+* specifies the period of time (the "transient") that we want to plot.
+* Afterwards, we just .plot the nodes that we are interested in.
+*
+* In this example, we plot the input and the output of the Xinv circuit in two
+* separate "plot channels". (You can plot both signals in one channel by saying
+* ".plot clk1 out" instead, but it will be hard to see any overlaps in signal.)
+*******************************************************************************
+
+.tran 640ns
+.plot clk1
+.plot clk2
+.plot clk3
+.plot clk4
+.plot clk5
+.plot clk6
+.plot clk7
+.plot fx_orig_out
+.plot fx_out
+.plot sum_orig
+.plot sum
+.plot c_out_orig
+.plot c_out
+
+
+*******************************************************************************
+* To actually see these plots, click the "Gate-level Simulation" button on the
+* toolbar (fourth button from the right, the one that looks like an AND gate).
+* This opens a separate Plot Window.
+*
+* While these .jsim files need to be opened in JSim to perform the simulations,
+* we HIGHLY recommend that you edit these files in a full-fledged text editor
+* instead of from within JSim's own editor, because the JSim editor does NOT
+* have undo/redo functions. I personally recommend Visual Studio Code:
+*
+*   https://code.visualstudio.com/
+*
+* Then, when you want to see your changes on the Plot Window, simply click the
+* "Reload Files" button (the button with the green looping arrows on a sheet of
+* paper), then re-simulate by clicking the "Gate-level Simulation" button (the
+* Plot Window has its own). It is NOT enough to click just one of the two
+* buttons -- you have to click Reload, then Simulation, in that order!
+*
+* Happy hacking! - eric, ros, gab
+*******************************************************************************
